@@ -1,54 +1,38 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Router, Route, Link,unstable_HistoryRouter } from 'react-router-dom';
-import App from '../App.jsx';
-
-class AppTest extends React.Component {
-    render() {
-        return (
-            <div>
-                <h1>App</h1>
-                <ul>
-                    <li><Link to="/about">About</Link></li>
-                    <li><Link to="/users/1">Users 1</Link></li>
-                    <li><Link to="/users/2">Users 2</Link></li>
-                </ul>
-                {this.props.children}
-            </div>
-        );
-    }
-}
-
-class About extends React.Component {
-    render() {
-        return (<h1>About</h1>);
-    }
-}
-
-class Users extends React.Component {
-    render() {
-        const id = this.props.params.userId;
-        return (
-            <div>
-                user id: {id}
-            </div>
-        )
-    }
-}
+// import '../App.css';
+// import React, { useState } from 'react';
+// import UnitControl from './component/UnitControl';
+// import CardFooter from './component/CardFooter';
+// import UnitConverter from './component/UnitConverter';
+// import { fab } from '@fortawesome/free-brands-svg-icons';
+// import { far } from '@fortawesome/free-regular-svg-icons';
+// import { fas } from '@fortawesome/free-solid-svg-icons';
+// import { library } from '@fortawesome/fontawesome-svg-core';
 
 
-ReactDOM.render(
-    (
-        <Router history={unstable_HistoryRouter}>
-            <Route path="/" component={App}>
-                <Route path="about" component={About} />
-                <Route path="users/:userId" component={Users} />
-            </Route>
-        </Router>
-    ),
-    document.getElementById('root')
-);
+// library.add(fab, fas, far);
 
 
-export default AppTest;
+// function speed() {
+//   //事件觸發區
+//   const [inputValue, setInputValue] = useState(0);
 
+//   const handelInputChange = (e) => {
+//     const { value } = e.target;
+//     setInputValue(value);
+//   }
+
+//   //畫面區
+//   return (
+//     <div className="container">
+//       <div className="card-header">Network Speed Converter</div>
+//       <div className="card-body">
+//         <UnitControl />
+//         <UnitConverter inputValue={inputValue} handelInputChange={handelInputChange}/>
+//       </div>
+//       <CardFooter inputValue={inputValue} />
+//     </div>
+
+//   );
+// }
+
+// export default speed;
