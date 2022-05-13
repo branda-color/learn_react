@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { ThemeProvider } from 'emotion-theming';
-import dayjs from 'dayjs';
+import { findLocation, getMoment, setCurrentCity } from './utils/helper';
+import useWeatherAPI from './hooks/useWeatherAPI';
 
-import { ReactComponent as DayCloudyIcon } from './images/day-cloudy.svg';
-import { ReactComponent as AirFlowIcon } from './images/airFlow.svg';
-import { ReactComponent as RainIcon } from './images/rain.svg';
-import { ReactComponent as RefreshIcon } from './images/refresh.svg';
-import { ReactComponent as LoadingIcon } from './images/loading.svg';
+
+import WeatherSetting from './views/WeatherSetting';
+import WeatherCard from './views/WeatherCard';
 
 const theme = {
   light: {
@@ -37,212 +36,71 @@ const Container = styled.div`
   justify-content: center;
 `;
 
-const WeatherCard = styled.div`
-  position: relative;
-  min-width: 360px;
-  box-shadow: ${({ theme }) => theme.boxShadow};
-  background-color: ${({ theme }) => theme.foregroundColor};
-  box-sizing: border-box;
-  padding: 30px 15px;
-`;
 
-const Location = styled.div`
-  font-size: 28px;
-  color: ${({ theme }) => theme.titleColor};
-  margin-bottom: 20px;
-`;
 
-const Description = styled.div`
-  font-size: 16px;
-  color: ${({ theme }) => theme.textColor};
-  margin-bottom: 30px;
-`;
 
-const CurrentWeather = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-`;
-
-const Temperature = styled.div`
-  color: ${({ theme }) => theme.temperatureColor};
-  font-size: 96px;
-  font-weight: 300;
-  display: flex;
-`;
-
-const Celsius = styled.div`
-  font-weight: normal;
-  font-size: 42px;
-`;
-
-const AirFlow = styled.div`
-  display: flex;
-  align-items: center;
-  font-size: 16x;
-  font-weight: 300;
-  color: ${({ theme }) => theme.textColor};
-  margin-bottom: 20px;
-  svg {
-    width: 25px;
-    height: auto;
-    margin-right: 30px;
-  }
-`;
-
-const Rain = styled.div`
-  display: flex;
-  align-items: center;
-  font-size: 16x;
-  font-weight: 300;
-  color: ${({ theme }) => theme.textColor};
-  svg {
-    width: 25px;
-    height: auto;
-    margin-right: 30px;
-  }
-`;
-
-const DayCloudy = styled(DayCloudyIcon)`
-  flex-basis: 30%;
-`;
-
-const Refresh = styled.div`
-  position: absolute;
-  right: 15px;
-  bottom: 15px;
-  font-size: 12px;
-  display: inline-flex;
-  align-items: flex-end;
-  color: ${({ theme }) => theme.textColor};
-  svg {
-    margin-left: 10px;
-    width: 15px;
-    height: 15px;
-    cursor: pointer;
-    animation: rotate infinite 1.5s linear;
-    animation-duration: ${({ isLoading }) => (isLoading ? '1.5s' : '0s')};
-  }
-
-  @keyframes rotate {
-    from {
-      transform: rotate(360deg);
-    }
-    to {
-      transform: rotate(0deg);
-    }
-  }
-`;
 const AUTHORIZATION_KEY = 'CWB-507B37E0-0383-4D8C-878D-628B54EC3536';
-const LOCATION_NAME = 466920;
+
+
+
 
 const App = () => {
 
-  console.log('121321321321');
+  const [currentPage, setCurrentPage] = useState('WeatherCard');
 
+  console.log('--- invoke function component ---');
   const [currentTheme, setCurrentTheme] = useState('light');
 
-  const [currentWeather, setCurrentWeather] = useState({
-    locationName: '臺北市',
-    description: '多雲時晴',
-    windSpeed: 1.1,
-    temperature: 22.9,
-    rainPossibility: 48.3,
-    observationTime: '2020-12-12 22:10:00',
-    isLoading: true
+  const [currentCity, setCurrentCity] = useState('臺北市');
+
+  const currentLocation = useMemo(() => findLocation(currentCity), [currentCity]);
+
+  const { cityName, locationName, sunriseCityName } = currentLocation;
+
+  const [weatherElement, fetchData] = useWeatherAPI({
+    locationName,
+    cityName,
+    authorizationKey: AUTHORIZATION_KEY,
   });
 
 
-  useEffect(() => {
-
-    console.log('56656565656');
-
-    fetchCurrentWeather();
-
-  }, []);
-
-  const fetchCurrentWeather = () => {
-
-    //把原本的資料放入
-    setCurrentWeather((prevState) => ({
-      ...prevState,
-      isLoading: true,
-    }));
-
-    fetch(
-      `https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=${AUTHORIZATION_KEY}&stationId=${LOCATION_NAME}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        // STEP 1：定義 `locationData` 把回傳的資料中會用到的部分取出來
-        const locationData = data.records.location[0];
-
-        // STEP 2：將風速（WDSD）和氣溫（TEMP）的資料取出
-        const weatherElements = locationData.weatherElement.reduce(
-          (neededElements, item) => {
-            if (['WDSD', 'TEMP'].includes(item.elementName)) {
-              neededElements[item.elementName] = item.elementValue;
-            }
-            return neededElements;
-          },
-          {}
-        );
-
-        // STEP 3：要使用到 React 組件中的資料
-        setCurrentWeather({
-          observationTime: locationData.time.obsTime,
-          locationName: locationData.locationName,
-          temperature: weatherElements.TEMP,
-          windSpeed: weatherElements.WDSD,
-          description: '多雲時晴',
-          rainPossibility: 60,
-          isLoading: false
-        });
-      });
+  const handleCurrentCityChange = (currentCity) => {
+    setCurrentCity(currentCity);
   };
 
-  const {
-    observationTime,
-    locationName,
-    description,
-    windSpeed,
-    temperature,
-    rainPossibility,
-    isLoading,
-  } = currentWeather;
+  //優化getMoment如果沒有更新就不重新更新LOCATION_NAME_FORECAST
+  const moment = useMemo(() => getMoment(sunriseCityName), [sunriseCityName]);
+
+  useEffect(() => {
+    setCurrentTheme(moment === 'day' ? 'light' : 'dark');
+  }, [moment]);
+
+
+  const handleCurrentPageChange = (currentPage) => {
+    setCurrentPage(currentPage);
+  };
+
 
 
   return (
     <ThemeProvider theme={theme[currentTheme]}>
-    <Container>
-      {console.log('render, isLoading: ', isLoading)}
-      <WeatherCard>
-        <Location>{locationName}</Location>
-        <Description>{description}</Description>
-        <CurrentWeather>
-          <Temperature>
-            {Math.round(temperature)} <Celsius>°C</Celsius>
-          </Temperature>
-          <DayCloudy />
-        </CurrentWeather>
-        <AirFlow>
-          <AirFlowIcon /> {windSpeed} m/h
-        </AirFlow>
-        <Rain>
-          <RainIcon /> {rainPossibility}%
-        </Rain>
-        <Refresh onClick={fetchCurrentWeather} isLoading={isLoading}>
-          最後觀測時間：
-          {new Intl.DateTimeFormat('zh-TW', {
-            hour: 'numeric',
-            minute: 'numeric',
-          }).format(dayjs(observationTime))}{' '}
-          {isLoading ? <LoadingIcon /> : <RefreshIcon />}
-        </Refresh>
-      </WeatherCard>
-    </Container>
-  </ThemeProvider>
+      <Container>
+        {currentPage === 'WeatherCard' && (
+          <WeatherCard cityName={cityName}
+            weatherElement={weatherElement}
+            moment={moment}
+            fetchData={fetchData} handleCurrentPageChange={handleCurrentPageChange} />
+
+        )}
+
+      </Container>
+      {currentPage === 'WeatherSetting' &&   <WeatherSetting
+            cityName={cityName}
+            handleCurrentCityChange={handleCurrentCityChange}
+            handleCurrentPageChange={handleCurrentPageChange}
+          />}
+
+    </ThemeProvider>
   );
 };
 
