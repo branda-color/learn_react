@@ -118,10 +118,9 @@ cursor: pointer;
 
 
 const WeatherCard = (
-    { weatherElement, moment, fetchData, handleCurrentPageChange }) => {
+    { weatherElement, moment, fetchData, handleCurrentPageChange, cityName }) => {
     const {
         observationTime,
-        cityName,
         temperature,
         windSpeed,
         description,
