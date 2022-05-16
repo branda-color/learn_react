@@ -4,6 +4,11 @@ import { ThemeProvider } from 'emotion-theming';
 import { findLocation, getMoment, setCurrentCity } from './utils/helper';
 import useWeatherAPI from './hooks/useWeatherAPI';
 
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import About from "./pages/About";
+import Speed from './component/Speed';
+
 
 import WeatherSetting from './views/WeatherSetting';
 import WeatherCard from './views/WeatherCard';
@@ -96,13 +101,22 @@ const App = () => {
         )}
 
       </Container>
-      {currentPage === 'WeatherSetting' &&   <WeatherSetting
-            cityName={cityName}
-            handleCurrentCityChange={handleCurrentCityChange}
-            handleCurrentPageChange={handleCurrentPageChange}
-          />}
+      {currentPage === 'WeatherSetting' && <WeatherSetting
+        cityName={cityName}
+        handleCurrentCityChange={handleCurrentCityChange}
+        handleCurrentPageChange={handleCurrentPageChange}
+      />}
 
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="about/*" element={<About />} />
+          <Route path="speed/*" element={<Speed />} />
+        </Routes>
+      </BrowserRouter>
     </ThemeProvider>
+
+
   );
 };
 
